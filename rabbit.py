@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from jwt.exceptions import InvalidTokenError
 from app.database import engine, Base, User
 from passlib.context import CryptContext
-from app.models import AddUser, Login, TokenData, Token
+from app.models import AddUser, Login, TokenData, Token, UserResponse
 from datetime import datetime, timedelta
 from typing import Dict, Annotated
 
@@ -86,7 +86,7 @@ def authenticate_user(username: str, plain_password: str, db: Session = Depends(
     if get_user is None:
         return False
 
-    if not verify_password(plain_password=plain_password, hashed_password=get_user.password_hash):
+    if not verify_password(plain_password=plain_password, hashed_password=get_user.password):
         return False
 
     return get_user
@@ -165,12 +165,12 @@ async def login_for_access_token(
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.user_name}, expires_delta=access_token_expires
+        data={"sub": user.user_name}, expire_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@app.get("/users/me/", response_model=AddUser)
+@app.get("/users/me/", response_model=UserResponse)
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
@@ -181,15 +181,7 @@ async def read_users_me(
 async def read_own_items(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    return [{"item_id": "Foo", "owner": current_user.username}]
-
-
-
-
-
-
-
-
+    return [{"item_id": "Foo", "owner": current_user.user_name}]
 
 
 
@@ -230,8 +222,6 @@ async def read_own_items(
 #             "message": "User has been created successfully."
 #         }
 #     )
-
-
 
 
 if __name__ == "__main__":

@@ -29,3 +29,11 @@ class TokenData(BaseModel):
 
 class UserInDB(BaseModel):
     hash_password: str
+
+
+class UserResponse(BaseModel):
+    user_name: str
+    email: str
+
+    class Config:
+        from_attributes = True
