@@ -16,3 +16,16 @@ class Login(BaseModel):
 
     class Config:
         from_attributes  = True
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: str | None = None
+
+
+class UserInDB(BaseModel):
+    hash_password: str
